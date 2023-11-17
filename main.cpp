@@ -29,13 +29,20 @@ static void CannyThreshold(int, void*)
 {
     //![reduce_noise]
     /// Reduce noise with a kernel 3x3
-    blur( src_gray, detected_edges, Size(3,3) );
+    blur(src_gray, detected_edges, Size(3,3));
     //![reduce_noise]
 
     //![canny]
     /// Canny detector
-    Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
+    Canny(detected_edges, detected_edges, lowThreshold, lowThreshold * ratio, kernel_size);
     //![canny]
+
+    /// Create a mask to select only white regions in the original image
+    Mat whiteMask;
+    inRange(src_gray, Scalar(200, 200, 200), Scalar(255, 255, 255), whiteMask);
+
+    /// Apply the mask to the Canny output
+    bitwise_and(detected_edges, whiteMask, detected_edges);
 
     /// Using Canny's output as a mask, we display our result
     //![fill]
@@ -43,14 +50,13 @@ static void CannyThreshold(int, void*)
     //![fill]
 
     //![copyto]
-    src.copyTo( dst, detected_edges);
+    src.copyTo(dst, detected_edges);
     //![copyto]
 
     //![display]
-    imshow( window_name, dst );
+    imshow(window_name, dst);
     //![display]
 }
-
 
 /**
  * @function main
