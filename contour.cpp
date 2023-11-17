@@ -1,0 +1,115 @@
+/**
+ * @file CannyDetector_Demo.cpp
+ * @brief Sample code showing how to detect edges using the Canny Detector
+ * @author OpenCV team
+ */
+
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include <iostream>
+
+using namespace cv;
+
+//![variables]
+Mat src, src_gray;
+Mat dst, detected_edges;
+
+int lowThreshold = 0;
+const int max_lowThreshold = 100;
+const int ratio = 3;
+const int kernel_size = 3;
+const char* window_name = "Edge Map";
+//![variables]
+
+/**
+ * @function CannyThreshold
+ * @brief Trackbar callback - Canny thresholds input with a ratio 1:3
+ */
+static void CannyThreshold(int, void*)
+{
+    //![reduce_noise]
+    /// Reduce noise with a kernel 3x3
+    blur(src_gray, detected_edges, Size(3, 3));
+    //![reduce_noise]
+
+    //![canny]
+    /// Canny detector
+    Canny(detected_edges, detected_edges, lowThreshold, lowThreshold * ratio, kernel_size);
+    //![canny]
+
+    /// Create a mask to select only white regions in the original image
+    Mat whiteMask;
+    inRange(src_gray, Scalar(200, 200, 200), Scalar(255, 255, 255), whiteMask);
+
+    /// Apply the mask to the Canny output
+    bitwise_and(detected_edges, whiteMask, detected_edges);
+
+    //![find_contours]
+    std::vector<std::vector<Point>> contours;
+    findContours(detected_edges, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+    //![find_contours]
+
+    //![approx_poly]
+    for (size_t i = 0; i < contours.size(); i++)
+    {
+        double epsilon = 0.5 * arcLength(contours[i], true);
+        approxPolyDP(contours[i], contours[i], epsilon, true);
+    }
+    //![approx_poly]
+
+    /// Draw the contours on the original image with a thinner green line
+    dst = Scalar::all(0);
+    drawContours(dst, contours, -1, Scalar(0, 255, 0), 1); // Thin line (thickness = 1)
+
+    //![display]
+    imshow(window_name, dst);
+    //![display]
+}
+
+/**
+ * @function main
+ */
+int main(int argc, char** argv)
+{
+    std::cout << "Test it 0\n"
+              << std::endl;
+    //![load]
+    CommandLineParser parser(argc, argv, "{@input | fruits.jpg | input image}");
+    // image = imread("C:\\sprayPainted.png");
+    src = imread("C:\\sprayPainted.png", IMREAD_COLOR); // Load an image
+
+    if (src.empty())
+    {
+        std::cout << "Could not open or find the image!\n"
+                  << std::endl;
+        std::cout << "Usage: " << argv[0] << " <Input image>" << std::endl;
+        return -1;
+    }
+    //![load]
+
+    //![create_mat]
+    /// Create a matrix of the same type and size as src (for dst)
+    dst.create(src.size(), src.type());
+    //![create_mat]
+
+    //![convert_to_gray]
+    cvtColor(src, src_gray, COLOR_BGR2GRAY);
+    //![convert_to_gray]
+
+    //![create_window]
+    namedWindow(window_name, WINDOW_AUTOSIZE);
+    //![create_window]
+
+    //![create_trackbar]
+    /// Create a Trackbar for user to enter threshold
+    createTrackbar("Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold);
+    //![create_trackbar]
+
+    /// Show the image
+    CannyThreshold(0, 0);
+
+    /// Wait until user exit program by pressing a key
+    waitKey(0);
+
+    return 0;
+}
