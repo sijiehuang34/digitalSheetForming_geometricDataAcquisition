@@ -4,13 +4,14 @@
 
 using namespace cv;
 
-// Define variables
+extern Mat convertedImage;
+
 Mat src, src_gray, detected_edges;
-Mat dst;
+Mat dst, cannyImage; // cannyImage will store the result
 
 int lowThreshold = 0;
 const int ratio = 3;                // We can change the ratio if we want
-const int kernel_size = 3;          // A convolution matrix for sharpening edges (see summer ML course notes)
+const int kernel_size = 3;          // A convolution matrix for sharpening edges
 
 // Canny thresholds input with a ratio 1:3     // Documentation suggested 1:2 or 1:3 for Canny
 static void CannyThreshold()
@@ -26,17 +27,16 @@ static void CannyThreshold()
     src.copyTo(dst, detected_edges);
 }
 
-int main(int argc, char** argv)
+// Renamed and redefined function
+void applyCannyEdgeDetection(const Mat& inputImage, Mat& outputImage)
 {
-  // Load the image
-  CommandLineParser parser(argc, argv, "{@input | fruits.jpg | input image}");
-  src = imread(parser.get<String>("@input"), IMREAD_COLOR); 
+  // Assign inputImage to src
+  src = inputImage;
 
   if(src.empty())
   {
-    std::cout << "Could not open or find the image!\n" << std::endl;
-    std::cout << "Usage: " << argv[0] << " <Input image>" << std::endl;
-    return -1;
+    std::cout << "Could not find the image!\n";
+    return; // Simply return because this function does not have a return type to indicate failure
   }
 
   /// Create a matrix of the same type and size as src (for dst)
@@ -48,8 +48,22 @@ int main(int argc, char** argv)
   /// Apply Canny edge detection
   CannyThreshold();
 
-  // Save the result
-  imwrite("filtered_image.jpg", dst);
+  // Assign the result to outputImage
+  outputImage = dst.clone();
+}
+
+int main()   // Do not include "main" in the actual program; just call it.
+{
+  // Example usage of the new function
+  Mat inputImage = convertedImage; // Assume this is your input image
+  Mat outputImage; // This will hold the output
+
+  applyCannyEdgeDetection(inputImage, outputImage);
+
+  // To display the result for debugging and viewing   // Delete this part if the code works
+  namedWindow("Canny Edge Detected Image", WINDOW_AUTOSIZE);
+  imshow("Canny Edge Detected Image", outputImage);
+  waitKey(0); // Wait for a key press to close the window
 
   return 0;
 }
