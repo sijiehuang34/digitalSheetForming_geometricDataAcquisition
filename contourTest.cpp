@@ -4,18 +4,18 @@
 using namespace cv;
 using namespace std;
 
-int main() {
+void detectAndDrawContours(const string& imagePath) {
     // Load the image
-    Mat image = imread("path_to_your_image.jpg");
+    Mat contourImage = imread(cannyOutputImage);
     
-    if(image.empty()) {
+    if(contourImage.empty()) {
         cout << "Could not open or find the image" << endl;
-        return -1;
+        return;
     }
 
     // Convert to HSV color space
     Mat hsvImage;
-    cvtColor(image, hsvImage, COLOR_BGR2HSV);
+    cvtColor(contourImage, hsvImage, COLOR_BGR2HSV);
 
     // Define the range of green color in HSV
     Scalar lowerGreen(50, 100, 100); // Adjust these values according to your needs
@@ -32,12 +32,16 @@ int main() {
 
     // Draw contours on the original image
     for(size_t i = 0; i < contours.size(); i++) {
-        drawContours(image, contours, static_cast<int>(i), Scalar(0, 255, 0), 2, LINE_8, hierarchy, 0);
+        drawContours(contourImage, contours, static_cast<int>(i), Scalar(0, 255, 0), 2, LINE_8, hierarchy, 0);
     }
 
     // Display the result
-    imshow("Detected Contours", image);
+    imshow("Detected Contours", contourImage);
     waitKey(0);
+}
 
+// Call it anywhere
+int main() {
+    detectAndDrawContours(cannyOutputImage);
     return 0;
 }
