@@ -28,7 +28,7 @@ static void CannyThreshold()
 }
 
 // Renamed and redefined function
-void applyCannyEdgeDetection(const Mat& inputImage, Mat& outputImage)
+void applyCannyEdgeDetection(const Mat& inputImage, Mat& cannyOutputImage)
 {
   // Assign inputImage to src
   src = inputImage;
@@ -49,20 +49,20 @@ void applyCannyEdgeDetection(const Mat& inputImage, Mat& outputImage)
   CannyThreshold();
 
   // Assign the result to outputImage
-  outputImage = dst.clone();
+  cannyOutputImage = dst.clone();
 }
 
 int main()   // Do not include "main" in the actual program; just call it.
 {
   // Example usage of the new function
   Mat inputImage = convertedImage; // Assume this is your input image
-  Mat outputImage; // This will hold the output
+  Mat cannyOutputImage; // This will hold the output
 
-  applyCannyEdgeDetection(inputImage, outputImage);
+  applyCannyEdgeDetection(inputImage, cannyOutputImage);
 
   // To display the result for debugging and viewing   // Delete this part if the code works
   namedWindow("Canny Edge Detected Image", WINDOW_AUTOSIZE);
-  imshow("Canny Edge Detected Image", outputImage);
+  imshow("Canny Edge Detected Image", cannyOutputImage);
   waitKey(0); // Wait for a key press to close the window
 
   return 0;
