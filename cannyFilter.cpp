@@ -12,7 +12,7 @@ int lowThreshold = 0;
 const int ratio = 3;                // We can change the ratio if we want
 const int kernel_size = 3;          // A convolution matrix for sharpening edges (see summer ML course notes)
 
-// Canny thresholds input with a ratio 1:3
+// Canny thresholds input with a ratio 1:3     // Documentation suggested 1:2 or 1:3 for Canny
 static void CannyThreshold()
 {
     /// Reduce noise with a kernel 3x3
